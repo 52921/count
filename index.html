@@ -3,175 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Shiv Counter Pro</title>
+    <title>Sweta's Magic Counter</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            touch-action: none;
-        }
-
+        * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
         body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Segoe UI', sans-serif;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; font-family: 'Segoe UI', sans-serif;
             background: url('https://images.unsplash.com/photo-1635323281206-382928503893?q=80&w=1920') no-repeat center center/cover;
-            background-attachment: fixed;
-            background-color: #000;
-            overflow: hidden;
+            background-attachment: fixed; background-color: #000; overflow: hidden;
         }
 
-        /* Draggable Main Box */
         #counter-box {
-            position: absolute;
-            cursor: move;
-            padding: 25px;
-            text-align: center;
-            width: 300px;
-            z-index: 100;
-            user-select: none;
-            background: transparent;
+            position: absolute; cursor: move; padding: 25px;
+            text-align: center; width: 340px; z-index: 100;
+            user-select: none; background: transparent;
+        }
+
+        /* Mantra Name Input */
+        #mantra-name {
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px; color: #00f2ff; text-align: center;
+            font-size: 18px; padding: 8px; width: 80%; margin-bottom: 15px;
+            outline: none; backdrop-filter: blur(5px);
+        }
+
+        #display-name {
+            font-size: 26px; color: #ffd700; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 10px;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.6); min-height: 35px;
         }
 
         #display {
-            font-size: 100px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 0 25px rgba(255, 255, 255, 0.7);
-            margin-bottom: 20px;
+            font-size: clamp(90px, 18vw, 130px); font-weight: bold; color: white;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8); margin-bottom: 20px; line-height: 1;
         }
 
-        .btn-group {
-            display: flex;
-            justify-content: space-around;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
+        .btn-group { display: flex; justify-content: space-around; gap: 10px; margin-bottom: 25px; }
 
-        /* All Buttons Style */
         .action-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid white;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: 0.3s;
-            backdrop-filter: blur(5px);
+            background: rgba(255, 255, 255, 0.1); border: 2px solid white;
+            color: white; cursor: pointer; display: flex;
+            justify-content: center; align-items: center;
+            transition: 0.3s; backdrop-filter: blur(8px);
         }
 
-        .circle-btn {
-            width: 75px;
-            height: 75px;
-            font-size: 35px;
-            border-radius: 50%;
+        /* Circular Buttons (+/- and Mike) */
+        .circle-btn { width: 80px; height: 80px; font-size: 38px; border-radius: 50%; }
+        
+        /* Mike Button Styling */
+        #mike-btn {
+            border-color: #ffd700; color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            font-size: 32px;
+        }
+        #mike-btn.recording {
+            background: rgba(255, 0, 0, 0.3); border-color: #ff4d4d; color: #ff4d4d;
+            box-shadow: 0 0 20px #ff4d4d; animation: pulse 1s infinite;
         }
 
-        .rect-btn {
-            width: 100%;
-            padding: 12px;
-            font-size: 14px;
-            border-radius: 12px;
-            margin-top: 10px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
-        .action-btn:active {
-            transform: scale(0.9);
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        /* Specific Colors */
+        .rect-btn { width: 100%; padding: 12px; font-size: 13px; border-radius: 12px; margin-top: 10px; font-weight: bold; text-transform: uppercase; }
+        
+        .action-btn:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.4); }
         .refresh-btn { border-color: #ff4d4d; color: #ff4d4d; }
         .bg-btn { border-color: #00f2ff; color: #00f2ff; }
 
-        .footer-text {
-            margin-top: 20px;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            letter-spacing: 2px;
-            font-weight: bold;
+        .footer-text { margin-top: 25px; font-size: 11px; color: white; letter-spacing: 2px; font-weight: bold; opacity: 0.8; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
     <div id="counter-box">
+        <input type="text" id="mantra-name" placeholder="Naam likhein (e.g. Radha)" oninput="updateName()">
+        <div id="display-name">RADHA</div>
+        
         <div id="display">0</div>
         
         <div class="btn-group">
-            <button class="action-btn circle-btn" onclick="decrement(event)">−</button>
-            <button class="action-btn circle-btn" onclick="increment(event)">+</button>
+            <button class="action-btn circle-btn" onclick="updateCount(-1, event)">−</button>
+            
+            <button class="action-btn circle-btn" id="mike-btn">🎤</button>
+            
+            <button class="action-btn circle-btn" onclick="updateCount(1, event)">+</button>
         </div>
 
-        <button class="action-btn rect-btn refresh-btn" onclick="resetCounter(event)">🔄 Refresh</button>
-
+        <button class="action-btn rect-btn refresh-btn" onclick="resetCounter(event)">🔄 Reset</button>
+        
         <label>
             <input type="file" id="image_input" accept="image/*" style="display:none;">
-            <div class="action-btn rect-btn bg-btn">📷 Change Image</div>
+            <div class="action-btn rect-btn bg-btn">📷 Change Photo</div>
         </label>
 
-        <div class="footer-text">CREATED BY SWETA KUMARI</div>
+        <div class="footer-text">DEDICATED TO SWETA BY ADHYAN ✨</div>
     </div>
 
     <script>
-        let count = 0;
+        let count = parseInt(localStorage.getItem('savedCount')) || 0;
+        let mantraName = localStorage.getItem('savedMantraName') || "RADHA";
         const display = document.getElementById('display');
+        const displayName = document.getElementById('display-name');
+        const mantraInput = document.getElementById('mantra-name');
         const box = document.getElementById('counter-box');
-        const image_input = document.getElementById("image_input");
+        const mikeBtn = document.getElementById('mike-btn');
+
+        // Initial Setup
+        display.innerText = count;
+        mantraInput.value = mantraName;
+        displayName.innerText = mantraName;
+
+        function updateName() {
+            mantraName = mantraInput.value.trim();
+            displayName.innerText = mantraName.toUpperCase();
+            localStorage.setItem('savedMantraName', mantraName);
+        }
+
+        function updateCount(val, e) {
+            if(e) e.stopPropagation();
+            count += val;
+            if(count < 0) count = 0;
+            display.innerText = count;
+            localStorage.setItem('savedCount', count);
+            
+            if (navigator.vibrate) navigator.vibrate(40);
+
+            // Celebration at 108
+            if(count === 108) {
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            }
+        }
+
+        function resetCounter(e) {
+            e.stopPropagation();
+            if(confirm("Counter zero karein?")) {
+                count = 0;
+                display.innerText = count;
+                localStorage.setItem('savedCount', count);
+            }
+        }
+
+        // --- Voice Recognition Logic ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true; // Continuous listening while holding
+            recognition.interimResults = false; // Only final results
+            recognition.lang = 'hi-IN'; // Set to Hindi/Indian English
+
+            recognition.onresult = (event) => {
+                const resultIndex = event.resultIndex;
+                const transcript = event.results[resultIndex][0].transcript.trim().toLowerCase();
+                
+                // Check if spoken word matches mantra name
+                if (transcript.includes(mantraName.toLowerCase())) {
+                    // It can detect multiple counts in one sentence
+                    const words = transcript.split(' ');
+                    const matches = words.filter(word => word === mantraName.toLowerCase()).length;
+                    
+                    if(matches > 0) {
+                        updateCount(matches);
+                    }
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+                stopRecording();
+            };
+
+            // Hold to Speak Logic
+            const startRecording = (e) => {
+                e.stopPropagation();
+                if(!mantraName) { alert("Pehle naam likhein!"); return; }
+                mikeBtn.classList.add('recording');
+                recognition.start();
+            };
+
+            const stopRecording = (e) => {
+                if(e) e.stopPropagation();
+                mikeBtn.classList.remove('recording');
+                recognition.stop();
+            };
+
+            // For Mobile (Touch)
+            mikeBtn.addEventListener('touchstart', startRecording);
+            mikeBtn.addEventListener('touchend', stopRecording);
+            // For Desktop (Mouse)
+            mikeBtn.addEventListener('mousedown', startRecording);
+            mikeBtn.addEventListener('mouseup', stopRecording);
+
+        } else {
+            mikeBtn.style.display = 'none';
+            alert("Aapke browser mein Voice Recognition support nahi hai. Please Chrome use karein.");
+        }
 
         // --- Dragging System ---
         let isDragging = false;
         let startX, startY, initialX, initialY;
 
         function startDragging(e) {
-            if (e.target.tagName === 'BUTTON' || e.target.closest('label')) return;
+            if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('label')) return;
             isDragging = true;
             const evt = e.type === 'touchstart' ? e.touches[0] : e;
-            startX = evt.clientX;
-            startY = evt.clientY;
-            initialX = box.offsetLeft;
-            initialY = box.offsetTop;
+            startX = evt.clientX; startY = evt.clientY;
+            initialX = box.offsetLeft; initialY = box.offsetTop;
         }
 
         function drag(e) {
             if (!isDragging) return;
             const evt = e.type === 'touchmove' ? e.touches[0] : e;
-            const dx = evt.clientX - startX;
-            const dy = evt.clientY - startY;
-            box.style.left = (initialX + dx) + 'px';
-            box.style.top = (initialY + dy) + 'px';
-            box.style.bottom = 'auto';
-            box.style.right = 'auto';
+            box.style.left = (initialX + (evt.clientX - startX)) + 'px';
+            box.style.top = (initialY + (evt.clientY - startY)) + 'px';
+            box.style.bottom = 'auto'; box.style.right = 'auto';
         }
-
-        function stopDragging() { isDragging = false; }
 
         box.addEventListener('mousedown', startDragging);
         box.addEventListener('touchstart', startDragging);
         window.addEventListener('mousemove', drag);
         window.addEventListener('touchmove', drag, { passive: false });
-        window.addEventListener('mouseup', stopDragging);
-        window.addEventListener('touchend', stopDragging);
+        window.addEventListener('mouseup', () => isDragging = false);
+        window.addEventListener('touchend', () => isDragging = false);
 
-        // --- Logic Functions ---
-        function increment(e) { e.stopPropagation(); count++; display.innerText = count; }
-        function decrement(e) { e.stopPropagation(); count--; if(count < 0) count = 0; display.innerText = count; }
-        function resetCounter(e) { e.stopPropagation(); count = 0; display.innerText = count; }
-
-        // --- Background Storage ---
+        // Background Logic
         window.onload = function() {
             const savedBg = localStorage.getItem('userBackground');
             if (savedBg) document.body.style.backgroundImage = `url(${savedBg})`;
         };
 
-        image_input.addEventListener("change", function() {
+        document.getElementById("image_input").addEventListener("change", function() {
             const reader = new FileReader();
             reader.onload = () => {
                 const imgData = reader.result;
