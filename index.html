@@ -7,41 +7,54 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; touch-action: none; }
-        
         body {
             display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh; font-family: 'Segoe UI', sans-serif;
             background: url('https://images.unsplash.com/photo-1635323281206-382928503893?q=80&w=1920') no-repeat center center/cover;
             background-attachment: fixed; background-color: #000; overflow: hidden;
         }
 
-        /* Draggable Box */
         #counter-box {
-            position: absolute; cursor: move; padding: 30px;
-            text-align: center; width: 340px; z-index: 100;
+            position: absolute; cursor: move; padding: 25px;
+            text-align: center; width: 320px; z-index: 100;
             user-select: none; background: transparent;
         }
 
-        /* Input for Mantra/Name */
-        #mantra-input {
-            background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: 12px; color: #00f2ff; text-align: center;
-            font-size: 18px; padding: 10px; width: 90%; margin-bottom: 10px;
-            outline: none; backdrop-filter: blur(10px);
+        #mantra-name {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 12px;
+            color: #00f2ff;
+            text-align: center;
+            font-size: 18px;
+            padding: 10px;
+            width: 90%;
+            margin-bottom: 10px;
+            outline: none;
+            backdrop-filter: blur(10px);
         }
 
         #display-name {
-            font-size: 24px; color: #ffd700; text-transform: uppercase;
-            letter-spacing: 3px; margin-bottom: 5px; font-weight: bold;
-            text-shadow: 0 0 15px rgba(255, 215, 0, 0.7); min-height: 35px;
+            font-size: 26px;
+            color: #ffd700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            min-height: 35px;
+            font-weight: bold;
         }
 
         #display {
-            font-size: clamp(80px, 18vw, 130px); font-weight: 900; color: white;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8); margin-bottom: 20px; line-height: 1;
+            font-size: clamp(90px, 20vw, 130px);
+            font-weight: 900;
+            color: white;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+            line-height: 1;
         }
 
-        .btn-group { display: flex; justify-content: space-around; align-items: center; gap: 15px; margin-bottom: 25px; }
+        .btn-group { display: flex; justify-content: space-around; gap: 15px; margin-bottom: 25px; }
 
         .action-btn {
             background: rgba(255, 255, 255, 0.1); border: 2px solid white;
@@ -51,44 +64,26 @@
             backdrop-filter: blur(10px);
         }
 
-        .circle-btn { width: 75px; height: 75px; font-size: 35px; border-radius: 50%; }
-        
-        #mike-btn {
-            border-color: #ffd700; color: #ffd700; width: 90px; height: 90px;
-            font-size: 40px; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
-        }
-
-        #mike-btn.recording {
-            background: rgba(255, 0, 0, 0.4); border-color: #ff4d4d; color: white;
-            box-shadow: 0 0 30px #ff4d4d; animation: pulse 1s infinite;
-        }
-
+        .circle-btn { width: 80px; height: 80px; font-size: 40px; border-radius: 50%; }
         .rect-btn { width: 100%; padding: 14px; font-size: 13px; border-radius: 15px; margin-top: 10px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
         
-        .action-btn:active { transform: scale(0.85); background: rgba(255, 255, 255, 0.3); }
+        .action-btn:active { transform: scale(0.85); background: rgba(255, 255, 255, 0.4); }
         .refresh-btn { border-color: #ff4d4d; color: #ff4d4d; }
         .bg-btn { border-color: #00f2ff; color: #00f2ff; }
 
         .footer-text { margin-top: 25px; font-size: 12px; color: white; letter-spacing: 2px; font-weight: bold; text-shadow: 1px 1px 4px #000; }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
     </style>
 </head>
 <body>
 
     <div id="counter-box">
-        <input type="text" id="mantra-input" placeholder="Naam Likhein (e.g. Radha)" oninput="updateName()">
+        <input type="text" id="mantra-name" placeholder="Name Likhein..." oninput="updateName()">
         <div id="display-name">RADHA</div>
         
         <div id="display">0</div>
         
         <div class="btn-group">
             <button class="action-btn circle-btn" onclick="updateCount(-1, event)">−</button>
-            <button class="action-btn circle-btn" id="mike-btn" title="Hold to Count by Voice">🎤</button>
             <button class="action-btn circle-btn" onclick="updateCount(1, event)">+</button>
         </div>
 
@@ -104,22 +99,21 @@
 
     <script>
         let count = parseInt(localStorage.getItem('savedCount')) || 0;
-        let mantraName = localStorage.getItem('savedMantraName') || "RADHA";
         const display = document.getElementById('display');
         const displayName = document.getElementById('display-name');
-        const mantraInput = document.getElementById('mantra-input');
+        const mantraInput = document.getElementById('mantra-name');
         const box = document.getElementById('counter-box');
-        const mikeBtn = document.getElementById('mike-btn');
 
-        // Initial Setup
+        // Setup
         display.innerText = count;
-        mantraInput.value = mantraName;
-        displayName.innerText = mantraName.toUpperCase();
+        const savedName = localStorage.getItem('savedMantraName') || "RADHA";
+        mantraInput.value = savedName;
+        displayName.innerText = savedName;
 
         function updateName() {
-            mantraName = mantraInput.value.trim();
-            displayName.innerText = mantraName.toUpperCase() || "JAAP";
-            localStorage.setItem('savedMantraName', mantraName);
+            const name = mantraInput.value.toUpperCase() || "JAAP";
+            displayName.innerText = name;
+            localStorage.setItem('savedMantraName', name);
         }
 
         function updateCount(val, e) {
@@ -129,11 +123,27 @@
             display.innerText = count;
             localStorage.setItem('savedCount', count);
             
+            // Vibration
             if (navigator.vibrate) navigator.vibrate(50);
-            
-            // Celebration at 108 or multiples
+
+            // Voice Count - Isse AI number bolega
+            speak(count);
+
+            // Celebration at 108
             if(count > 0 && count % 108 === 0) {
                 confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
+            }
+        }
+
+        function speak(text) {
+            // Browser voice support check
+            if ('speechSynthesis' in window) {
+                const msg = new SpeechSynthesisUtterance();
+                msg.text = text;
+                msg.rate = 1.3; // Speed thodi fast rakhi hai counting ke liye
+                msg.pitch = 1;
+                window.speechSynthesis.cancel(); // Pichli voice ko stop karke nayi bolne ke liye
+                window.speechSynthesis.speak(msg);
             }
         }
 
@@ -143,83 +153,42 @@
                 count = 0;
                 display.innerText = count;
                 localStorage.setItem('savedCount', count);
+                window.speechSynthesis.cancel();
             }
         }
 
-        // --- Voice Recognition Logic ---
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'hi-IN';
-
-            recognition.onresult = (event) => {
-                let currentTranscript = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        currentTranscript = event.results[i][0].transcript.toLowerCase();
-                        
-                        if (mantraName && currentTranscript.includes(mantraName.toLowerCase())) {
-                            // Find matches in string
-                            const target = mantraName.toLowerCase();
-                            const words = currentTranscript.split(/\s+/);
-                            let found = 0;
-                            words.forEach(w => { if(w.includes(target)) found++; });
-                            if(found > 0) updateCount(found);
-                        }
-                    }
-                }
-            };
-
-            const startRec = (e) => {
-                e.preventDefault(); e.stopPropagation();
-                mikeBtn.classList.add('recording');
-                try { recognition.start(); } catch(err) {}
-            };
-
-            const stopRec = (e) => {
-                if(e) { e.preventDefault(); e.stopPropagation(); }
-                mikeBtn.classList.remove('recording');
-                try { recognition.stop(); } catch(err) {}
-            };
-
-            // Hold events for Mike
-            mikeBtn.addEventListener('mousedown', startRec);
-            window.addEventListener('mouseup', stopRec);
-            mikeBtn.addEventListener('touchstart', startRec);
-            window.addEventListener('touchend', stopRec);
-        }
-
-        // --- Draggable Logic ---
+        // --- Dragging System ---
         let isDragging = false, startX, startY, initX, initY;
-        const startDrag = (e) => {
+
+        function startDragging(e) {
             if (['BUTTON', 'INPUT'].includes(e.target.tagName) || e.target.closest('label')) return;
             isDragging = true;
             const evt = e.type === 'touchstart' ? e.touches[0] : e;
             startX = evt.clientX; startY = evt.clientY;
             initX = box.offsetLeft; initY = box.offsetTop;
-        };
-        const doDrag = (e) => {
+        }
+
+        function drag(e) {
             if (!isDragging) return;
             const evt = e.type === 'touchmove' ? e.touches[0] : e;
             box.style.left = (initX + (evt.clientX - startX)) + 'px';
             box.style.top = (initY + (evt.clientY - startY)) + 'px';
             box.style.bottom = 'auto'; box.style.right = 'auto';
-        };
-        box.addEventListener('mousedown', startDrag);
-        box.addEventListener('touchstart', startDrag);
-        window.addEventListener('mousemove', doDrag);
-        window.addEventListener('touchmove', doDrag, { passive: false });
+        }
+
+        box.addEventListener('mousedown', startDragging);
+        box.addEventListener('touchstart', startDragging);
+        window.addEventListener('mousemove', drag);
+        window.addEventListener('touchmove', drag, { passive: false });
         window.addEventListener('mouseup', () => isDragging = false);
         window.addEventListener('touchend', () => isDragging = false);
 
-        // --- Background Storage ---
-        window.onload = () => {
+        // Background Loading
+        window.onload = function() {
             const bg = localStorage.getItem('userBackground');
             if (bg) document.body.style.backgroundImage = `url(${bg})`;
         };
+
         document.getElementById("image_input").addEventListener("change", function() {
             const reader = new FileReader();
             reader.onload = () => {
