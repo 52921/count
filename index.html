@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Shiv Counter Pro</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            touch-action: none;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            background: url('https://images.unsplash.com/photo-1635323281206-382928503893?q=80&w=1920') no-repeat center center/cover;
+            background-attachment: fixed;
+            background-color: #000;
+            overflow: hidden;
+        }
+
+        /* Draggable Main Box */
+        #counter-box {
+            position: absolute;
+            cursor: move;
+            padding: 25px;
+            text-align: center;
+            width: 300px;
+            z-index: 100;
+            user-select: none;
+            background: transparent;
+        }
+
+        #display {
+            font-size: 100px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 25px rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        /* All Buttons Style */
+        .action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid white;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .circle-btn {
+            width: 75px;
+            height: 75px;
+            font-size: 35px;
+            border-radius: 50%;
+        }
+
+        .rect-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            border-radius: 12px;
+            margin-top: 10px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .action-btn:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Specific Colors */
+        .refresh-btn { border-color: #ff4d4d; color: #ff4d4d; }
+        .bg-btn { border-color: #00f2ff; color: #00f2ff; }
+
+        .footer-text {
+            margin-top: 20px;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="counter-box">
+        <div id="display">0</div>
+        
+        <div class="btn-group">
+            <button class="action-btn circle-btn" onclick="decrement(event)">−</button>
+            <button class="action-btn circle-btn" onclick="increment(event)">+</button>
+        </div>
+
+        <button class="action-btn rect-btn refresh-btn" onclick="resetCounter(event)">🔄 Refresh</button>
+
+        <label>
+            <input type="file" id="image_input" accept="image/*" style="display:none;">
+            <div class="action-btn rect-btn bg-btn">📷 Change Image</div>
+        </label>
+
+        <div class="footer-text">CREATED BY SWETA KUMARI</div>
+    </div>
+
+    <script>
+        let count = 0;
+        const display = document.getElementById('display');
+        const box = document.getElementById('counter-box');
+        const image_input = document.getElementById("image_input");
+
+        // --- Dragging System ---
+        let isDragging = false;
+        let startX, startY, initialX, initialY;
+
+        function startDragging(e) {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('label')) return;
+            isDragging = true;
+            const evt = e.type === 'touchstart' ? e.touches[0] : e;
+            startX = evt.clientX;
+            startY = evt.clientY;
+            initialX = box.offsetLeft;
+            initialY = box.offsetTop;
+        }
+
+        function drag(e) {
+            if (!isDragging) return;
+            const evt = e.type === 'touchmove' ? e.touches[0] : e;
+            const dx = evt.clientX - startX;
+            const dy = evt.clientY - startY;
+            box.style.left = (initialX + dx) + 'px';
+            box.style.top = (initialY + dy) + 'px';
+            box.style.bottom = 'auto';
+            box.style.right = 'auto';
+        }
+
+        function stopDragging() { isDragging = false; }
+
+        box.addEventListener('mousedown', startDragging);
+        box.addEventListener('touchstart', startDragging);
+        window.addEventListener('mousemove', drag);
+        window.addEventListener('touchmove', drag, { passive: false });
+        window.addEventListener('mouseup', stopDragging);
+        window.addEventListener('touchend', stopDragging);
+
+        // --- Logic Functions ---
+        function increment(e) { e.stopPropagation(); count++; display.innerText = count; }
+        function decrement(e) { e.stopPropagation(); count--; if(count < 0) count = 0; display.innerText = count; }
+        function resetCounter(e) { e.stopPropagation(); count = 0; display.innerText = count; }
+
+        // --- Background Storage ---
+        window.onload = function() {
+            const savedBg = localStorage.getItem('userBackground');
+            if (savedBg) document.body.style.backgroundImage = `url(${savedBg})`;
+        };
+
+        image_input.addEventListener("change", function() {
+            const reader = new FileReader();
+            reader.onload = () => {
+                const imgData = reader.result;
+                document.body.style.backgroundImage = `url(${imgData})`;
+                localStorage.setItem('userBackground', imgData);
+            };
+            reader.readAsDataURL(this.files[0]);
+        });
+    </script>
+</body>
+</html>
